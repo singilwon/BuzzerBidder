@@ -1,15 +1,12 @@
 "use client";
 import ContentContainer from "../common/ContentContainer";
 import Title from "../common/Title";
-import WrapperImage from "../common/WrapperImage";
-import StatusBadge from "../common/StatusBadge";
 import Input from "../common/Input";
 import MileStoneSemiTitle from "@/components/common/MileStoneSemiTitle";
 import Button from "../common/Button";
 import TradeItem from "./TradeItem";
 import { useTradeDetail } from "@/features/trade/hooks/useTrade";
 import { useEffect, useState } from "react";
-import { tradeStatusToUIStatus } from "@/utils/tradeStatusMapper";
 import OptionDropdown from "../common/OptionDropdown";
 import { CARRIER_LABEL_MAP } from "@/utils/carrierCodeMapper";
 import { useUpdateAddress } from "@/features/delivery/hooks/useUpdateAddress";
@@ -19,6 +16,7 @@ import { buildMilestones } from "@/utils/buildMilestones";
 import ConfirmModal from "../modal/ConfirmModal";
 import { usePayBalance } from "@/features/payments/hooks/usePayBalance";
 import { useConfirmTrade } from "@/features/trade/hooks/useConfirmTrade";
+import TradeProductSummary from "./TradeProductSummary";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -97,8 +95,6 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
   if (isLoading) return <div>로딩 중...</div>;
   if (isError || !tradeData) return <div>거래 정보를 불러올 수 없습니다.</div>;
 
-  const uiStatus = tradeStatusToUIStatus[tradeData.status];
-
   const milestones = buildMilestones({
     role: tradeData.role,
     status: tradeData.status,
@@ -110,27 +106,12 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
   return (
     <div className="mx-auto mt-2 flex w-full max-w-[1440px] flex-col gap-7 overflow-y-hidden">
       <ContentContainer className="border-border-sub bg-content-area m-0 flex w-full flex-col gap-12 gap-y-5 border-3 px-5 py-7 md:w-full md:px-10 lg:flex-row">
-        <div className="flex flex-col lg:min-w-[55%]">
-          <Title className="text-title-sub ml-3 text-[24px]">상품 정보</Title>
-          <ContentContainer className="border-border-main flex h-full flex-col items-center justify-center gap-10 overflow-auto border-3 p-8 md:flex-row">
-            {/* 이미지 */}
-            <div className="h-34 w-34 shrink-0">
-              <WrapperImage src={tradeData.image} alt="상품 사진" />
-            </div>
-
-            {/* 정보 */}
-            <div className="flex flex-col justify-center gap-3">
-              <StatusBadge status={uiStatus} className="border-none" />
-
-              <p className="text-title-main-dark text-[20px] font-bold">{tradeData.itemName}</p>
-
-              <div className="mt-2">
-                <p className="text-title-main-dark text-[11px]">낙찰가</p>
-                <p className="text-custom-red text-[17px] font-bold">{tradeData.winningPrice}</p>
-              </div>
-            </div>
-          </ContentContainer>
-        </div>
+        <TradeProductSummary
+          image={tradeData.image}
+          itemName={tradeData.itemName}
+          winningPrice={tradeData.winningPrice}
+          status={tradeData.status}
+        />
         <div className="flex min-w-full flex-col lg:min-w-[40%]">
           <Title className="text-title-sub ml-3 text-[24px]">배송</Title>
           <ContentContainer className="border-border-main text-title-main-dark grid gap-1 border-3 p-8 text-[11px] font-bold">
