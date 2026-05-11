@@ -1,12 +1,7 @@
 "use client";
 import ContentContainer from "../common/ContentContainer";
-import Title from "../common/Title";
-import Input from "../common/Input";
-import Button from "../common/Button";
 import { useTradeDetail } from "@/features/trade/hooks/useTrade";
 import { useEffect, useState } from "react";
-import OptionDropdown from "../common/OptionDropdown";
-import { CARRIER_LABEL_MAP } from "@/utils/carrierCodeMapper";
 import { useUpdateAddress } from "@/features/delivery/hooks/useUpdateAddress";
 import { useUpdateDelivery } from "@/features/delivery/hooks/useUpdateDelivery";
 import Toast from "../common/Toast";
@@ -16,6 +11,7 @@ import { usePayBalance } from "@/features/payments/hooks/usePayBalance";
 import { useConfirmTrade } from "@/features/trade/hooks/useConfirmTrade";
 import TradeProductSummary from "./TradeProductSummary";
 import TradeTimeline from "./TradeTimeline";
+import TradeDeliverySection from "./TradeDeliverySection";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -37,12 +33,6 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
   const { mutate: confirmTradeMutate } = useConfirmTrade();
 
   const { data: tradeData, isLoading, isError } = useTradeDetail({ auctionType, dealId });
-
-  const isBuyer = tradeData?.role === "BUYER";
-  const isSeller = tradeData?.role === "SELLER";
-
-  const deliveryEditable = isBuyer; // 배송/상세주소
-  const invoiceEditable = isSeller; // 송장/택배사(드롭다운)
 
   const handleSubmit = () => {
     if (!tradeData) return;
@@ -111,78 +101,20 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
           winningPrice={tradeData.winningPrice}
           status={tradeData.status}
         />
-        <div className="flex min-w-full flex-col lg:min-w-[40%]">
-          <Title className="text-title-sub ml-3 text-[24px]">배송</Title>
-          <ContentContainer className="border-border-main text-title-main-dark grid gap-1 border-3 p-8 text-[11px] font-bold">
-            <div className="grid gap-2">
-              <p>배송지</p>
-
-              <Input
-                value={address}
-                placeholder="입력"
-                className="h-10 px-3 py-2 sm:py-1"
-                onChange={e => setAddress(e.target.value)}
-                disabled={!deliveryEditable}
-              />
-              {!deliveryEditable && (
-                <p className="ml-1 text-[10px] opacity-60">구매자만 수정할 수 있어요.</p>
-              )}
-            </div>
-
-            <div className="grid gap-2">
-              <p>상세 주소</p>
-              <Input
-                value={addressDetail}
-                placeholder="입력"
-                className="h-10"
-                onChange={e => setAddressDetail(e.target.value)}
-                disabled={!deliveryEditable}
-              />
-            </div>
-
-            <div className="grid gap-2">
-              <p>우편 번호</p>
-              <Input
-                value={postal}
-                placeholder="입력"
-                className="h-10"
-                onChange={e => setPostal(e.target.value)}
-                disabled={!deliveryEditable}
-              />
-            </div>
-
-            <div className="mt-2 grid gap-2">
-              <p>송장 번호</p>
-              <Input
-                value={invoiceNumber}
-                placeholder="입력"
-                className="h-10 px-3 py-2 sm:py-1"
-                onChange={e => setInvoiceNumber(e.target.value)}
-                disabled={!invoiceEditable}
-              />
-              {!invoiceEditable && (
-                <p className="ml-1 text-[10px] opacity-60">판매자만 입력할 수 있어요.</p>
-              )}
-            </div>
-
-            <div className="mt-2 flex items-center justify-between gap-2">
-              {/* 드롭다운: 판매자만 변경 가능 */}
-              <div className={!invoiceEditable ? "pointer-events-none opacity-60" : ""}>
-                <OptionDropdown label={carrier ? CARRIER_LABEL_MAP[carrier] : "택배사 선택"}>
-                  {Object.entries(CARRIER_LABEL_MAP).map(([code, label]) => (
-                    <OptionDropdown.Item key={code} onClick={() => setCarrier(code as Carrier)}>
-                      {label}
-                    </OptionDropdown.Item>
-                  ))}
-                </OptionDropdown>
-              </div>
-
-              <Button className="max-h-9 border-2" onClick={handleSubmit}>
-                수정
-              </Button>
-            </div>
-          </ContentContainer>
-        </div>
+        <TradeDeliverySection
+          role={tradeData.role}
+          address={address}
+          addressDetail={addressDetail}
+          postal={postal}
+          invoiceNumber={invoiceNumber}
+          carrier={carrier}
+          onChangeAddress={setAddress}
+          onChangeAddressDetail={setAddressDetail}
+          onChangePostal={setPostal}
+          onChangeInvoiceNumber={setInvoiceNumber}
+          onChangeCarrier={setCarrier}
+          onSubmit={handleSubmit}
+        />
       </ContentContainer>
       <TradeTimeline milestones={milestones} />
       {isPayModalOpen && (
