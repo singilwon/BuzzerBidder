@@ -2,9 +2,7 @@
 import ContentContainer from "../common/ContentContainer";
 import Title from "../common/Title";
 import Input from "../common/Input";
-import MileStoneSemiTitle from "@/components/common/MileStoneSemiTitle";
 import Button from "../common/Button";
-import TradeItem from "./TradeItem";
 import { useTradeDetail } from "@/features/trade/hooks/useTrade";
 import { useEffect, useState } from "react";
 import OptionDropdown from "../common/OptionDropdown";
@@ -17,6 +15,7 @@ import ConfirmModal from "../modal/ConfirmModal";
 import { usePayBalance } from "@/features/payments/hooks/usePayBalance";
 import { useConfirmTrade } from "@/features/trade/hooks/useConfirmTrade";
 import TradeProductSummary from "./TradeProductSummary";
+import TradeTimeline from "./TradeTimeline";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -185,30 +184,7 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
           </ContentContainer>
         </div>
       </ContentContainer>
-      <section className="relative min-h-screen py-5">
-        <div className="bg-border-main absolute top-5 left-7 h-full w-[3px]" />
-
-        {milestones.map(step => (
-          <div key={step.key} className="mb-12">
-            <MileStoneSemiTitle title={step.title} className="mb-2 ml-2 rotate-2" />
-
-            <TradeItem>
-              {step.description}
-
-              {step.action && (
-                <Button
-                  className={`bg-btn-default ml-3 max-h-7 transition-all hover:scale-101 active:scale-99 ${step.key === "PENDING" ? "bg-custom-red text-white" : ""}`}
-                  onClick={step.action.onClick}
-                >
-                  {step.action.label}
-                </Button>
-              )}
-            </TradeItem>
-
-            <div className="mt-12 ml-15 w-[95%] border-t-[3px] border-dashed border-[#A1887F]/30" />
-          </div>
-        ))}
-      </section>
+      <TradeTimeline milestones={milestones} />
       {isPayModalOpen && (
         <ConfirmModal
           title="잔금을 결제하시겠습니까?"
