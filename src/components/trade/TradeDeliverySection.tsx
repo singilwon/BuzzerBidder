@@ -1,3 +1,4 @@
+"use client";
 import { CARRIER_LABEL_MAP } from "@/utils/carrierCodeMapper";
 import Button from "../common/Button";
 import ContentContainer from "../common/ContentContainer";

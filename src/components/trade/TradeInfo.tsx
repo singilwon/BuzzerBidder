@@ -1,10 +1,7 @@
 "use client";
 import ContentContainer from "../common/ContentContainer";
 import { useTradeDetail } from "@/features/trade/hooks/useTrade";
-import { useEffect, useState } from "react";
-import { useUpdateAddress } from "@/features/delivery/hooks/useUpdateAddress";
-import { useUpdateDelivery } from "@/features/delivery/hooks/useUpdateDelivery";
-import Toast from "../common/Toast";
+import { useState } from "react";
 import { buildMilestones } from "@/utils/buildMilestones";
 import ConfirmModal from "../modal/ConfirmModal";
 import { usePayBalance } from "@/features/payments/hooks/usePayBalance";
@@ -12,6 +9,7 @@ import { useConfirmTrade } from "@/features/trade/hooks/useConfirmTrade";
 import TradeProductSummary from "./TradeProductSummary";
 import TradeTimeline from "./TradeTimeline";
 import TradeDeliverySection from "./TradeDeliverySection";
+import { useTradeDeliveryForm } from "@/features/trade/hooks/useTradeDeliveryForm";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -19,67 +17,19 @@ type TradeInfoProps = {
 };
 
 export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
-  const [address, setAddress] = useState("");
-  const [addressDetail, setAddressDetail] = useState("");
-  const [postal, setPostal] = useState("");
-  const [invoiceNumber, setInvoiceNumber] = useState("");
-  const [carrier, setCarrier] = useState<Carrier | "">("");
   const [isPayModalOpen, setIsPayModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   const { mutate: payBalanceMutate } = usePayBalance();
-  const { mutate: updateAddressMutate } = useUpdateAddress();
-  const { mutate: updateDeliveryMutate } = useUpdateDelivery();
   const { mutate: confirmTradeMutate } = useConfirmTrade();
 
   const { data: tradeData, isLoading, isError } = useTradeDetail({ auctionType, dealId });
 
-  const handleSubmit = () => {
-    if (!tradeData) return;
-
-    // 구매자: 배송지 수정
-    if (tradeData.role === "BUYER") {
-      updateAddressMutate({
-        auctionType,
-        dealId,
-        payload: {
-          address,
-          addressDetail,
-          postalCode: postal,
-        },
-      });
-    }
-
-    if (tradeData.role === "SELLER") {
-      if (!carrier) {
-        Toast({ message: "택배사를 골라주세요", type: "ERROR" });
-        return;
-      }
-      updateDeliveryMutate({
-        auctionType,
-        dealId,
-        payload: {
-          carrierCode: carrier,
-          trackingNumber: invoiceNumber,
-        },
-      });
-    }
-  };
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setAddress(tradeData?.deliveryAddress ?? "");
-    setAddressDetail(tradeData?.deliveryAddressDetail ?? "");
-    setPostal(tradeData?.deliveryPostalCode ?? "");
-    setInvoiceNumber(tradeData?.trackingNumber ?? "");
-    setCarrier(tradeData?.carrierCode ?? "");
-  }, [
-    tradeData?.deliveryAddress,
-    tradeData?.deliveryAddressDetail,
-    tradeData?.deliveryPostalCode,
-    tradeData?.carrierCode,
-    tradeData?.trackingNumber,
-  ]);
+  const deliveryForm = useTradeDeliveryForm({
+    auctionType,
+    dealId,
+    tradeData,
+  });
 
   if (isLoading) return <div>로딩 중...</div>;
   if (isError || !tradeData) return <div>거래 정보를 불러올 수 없습니다.</div>;
@@ -103,17 +53,17 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
         />
         <TradeDeliverySection
           role={tradeData.role}
-          address={address}
-          addressDetail={addressDetail}
-          postal={postal}
-          invoiceNumber={invoiceNumber}
-          carrier={carrier}
-          onChangeAddress={setAddress}
-          onChangeAddressDetail={setAddressDetail}
-          onChangePostal={setPostal}
-          onChangeInvoiceNumber={setInvoiceNumber}
-          onChangeCarrier={setCarrier}
-          onSubmit={handleSubmit}
+          address={deliveryForm.address}
+          addressDetail={deliveryForm.addressDetail}
+          postal={deliveryForm.postal}
+          invoiceNumber={deliveryForm.invoiceNumber}
+          carrier={deliveryForm.carrier}
+          onChangeAddress={deliveryForm.setAddress}
+          onChangeAddressDetail={deliveryForm.setAddressDetail}
+          onChangePostal={deliveryForm.setPostal}
+          onChangeInvoiceNumber={deliveryForm.setInvoiceNumber}
+          onChangeCarrier={deliveryForm.setCarrier}
+          onSubmit={deliveryForm.handleSubmit}
         />
       </ContentContainer>
       <TradeTimeline milestones={milestones} />
