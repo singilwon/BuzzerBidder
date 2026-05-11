@@ -3,13 +3,13 @@ import ContentContainer from "../common/ContentContainer";
 import { useTradeDetail } from "@/features/trade/hooks/useTrade";
 import { useState } from "react";
 import { buildMilestones } from "@/utils/buildMilestones";
-import ConfirmModal from "../modal/ConfirmModal";
 import { usePayBalance } from "@/features/payments/hooks/usePayBalance";
 import { useConfirmTrade } from "@/features/trade/hooks/useConfirmTrade";
 import TradeProductSummary from "./TradeProductSummary";
 import TradeTimeline from "./TradeTimeline";
 import TradeDeliverySection from "./TradeDeliverySection";
 import { useTradeDeliveryForm } from "@/features/trade/hooks/useTradeDeliveryForm";
+import TradeActionModals from "./TradeActionModals";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -67,31 +67,20 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
         />
       </ContentContainer>
       <TradeTimeline milestones={milestones} />
-      {isPayModalOpen && (
-        <ConfirmModal
-          title="잔금을 결제하시겠습니까?"
-          description="결제 후에는 거래가 진행 단계로 넘어갑니다."
-          confirmText="결제하기"
-          onCancel={() => setIsPayModalOpen(false)}
-          onConfirm={() => {
-            payBalanceMutate(dealId);
-            setIsPayModalOpen(false);
-          }}
-        />
-      )}
-      {isConfirmModalOpen && (
-        <ConfirmModal
-          title="구매를 확정하시겠습니까?"
-          description="구매 확정 후에는 거래가 완료되며 되돌릴 수 없습니다."
-          confirmText="구매 확정"
-          cancelText="취소"
-          onCancel={() => setIsConfirmModalOpen(false)}
-          onConfirm={() => {
-            confirmTradeMutate({ type: auctionType, dealId });
-            setIsConfirmModalOpen(false);
-          }}
-        />
-      )}
+      <TradeActionModals
+        isPayModalOpen={isPayModalOpen}
+        isConfirmModalOpen={isConfirmModalOpen}
+        onClosePayModal={() => setIsPayModalOpen(false)}
+        onCloseConfirmModal={() => setIsConfirmModalOpen(false)}
+        onConfirmPay={() => {
+          payBalanceMutate(dealId);
+          setIsPayModalOpen(false);
+        }}
+        onConfirmTrade={() => {
+          confirmTradeMutate({ type: auctionType, dealId });
+          setIsConfirmModalOpen(false);
+        }}
+      />
     </div>
   );
 }
