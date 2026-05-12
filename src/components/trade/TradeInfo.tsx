@@ -10,6 +10,7 @@ import TradeTimeline from "./TradeTimeline";
 import TradeDeliverySection from "./TradeDeliverySection";
 import { useTradeDeliveryForm } from "@/features/trade/hooks/useTradeDeliveryForm";
 import TradeActionModals from "./TradeActionModals";
+import TradeStateView from "./TradeStateView";
 
 type TradeInfoProps = {
   auctionType: "LIVE" | "DELAYED";
@@ -31,8 +32,8 @@ export default function TradeInfo({ auctionType, dealId }: TradeInfoProps) {
     tradeData,
   });
 
-  if (isLoading) return <div>로딩 중...</div>;
-  if (isError || !tradeData) return <div>거래 정보를 불러올 수 없습니다.</div>;
+  if (isLoading) return <TradeStateView type="loading" />;
+  if (isError || !tradeData) return <TradeStateView type="error" />;
 
   const milestones = buildMilestones({
     role: tradeData.role,
