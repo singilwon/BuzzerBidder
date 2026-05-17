@@ -17,7 +17,7 @@ export const useApprovePayments = () => {
       qc.invalidateQueries({ queryKey: paymentQueryKeys.wallet() });
       Toast({ message: "결제를 완료하였습니다.", type: "SUCCESS" });
 
-      router.push("/mypage/complete");
+      router.push("/payments/complete");
     },
     onError: () => {
       Toast({ message: "결제에 실패하였습니다.", type: "ERROR" });
