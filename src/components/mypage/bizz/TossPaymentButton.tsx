@@ -49,7 +49,7 @@ export default function TossPaymentButton({
             orderId,
             orderName,
             successUrl: `${window.location.origin}/payments/success`,
-            failUrl: `${window.location.origin}/mypage/bizz`,
+            failUrl: `${window.location.origin}/payments/fail`,
             customerEmail: user?.email,
             customerName: user?.nickname,
             card: {

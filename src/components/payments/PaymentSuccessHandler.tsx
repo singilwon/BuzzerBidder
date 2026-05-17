@@ -1,17 +1,14 @@
 "use client";
 
 import { useApprovePayments } from "@/features/payments/hooks/useApprovePayments";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePaymentSearchParams } from "@/features/payments/hooks/usePaymentSearchParams";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 
-export default function Success() {
-  const params = useSearchParams();
+export default function PaymentSuccessHandler() {
   const router = useRouter();
   const approvePayments = useApprovePayments();
-
-  const paymentKey = params.get("paymentKey");
-  const orderId = params.get("orderId");
-  const amount = Number(params.get("amount"));
+  const { paymentKey, orderId, amount, isValid } = usePaymentSearchParams();
 
   const calledRef = useRef(false);
 
@@ -19,13 +16,13 @@ export default function Success() {
     if (calledRef.current) return;
     calledRef.current = true;
 
-    if (!paymentKey || !orderId || !Number.isFinite(amount)) {
+    if (!isValid || !paymentKey || !orderId) {
       router.push("/mypage/bizz");
       return;
     }
 
     approvePayments.mutate({ paymentKey, orderId, amount });
-  }, [paymentKey, orderId, amount, approvePayments, router]);
+  }, [isValid, paymentKey, orderId, amount, approvePayments, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
