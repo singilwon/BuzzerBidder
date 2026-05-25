@@ -11,6 +11,15 @@ type ProductCard = WishableItem & {
   uid: string;
 };
 
+type WishToggleVariables = {
+  id: number;
+  type: "LIVE" | "DELAYED";
+};
+
+type WishToggleContext = {
+  previousQueries: [readonly unknown[], unknown][];
+};
+
 const TARGET_KEYS = [
   "delayedProducts",
   "liveProducts",
@@ -20,6 +29,10 @@ const TARGET_KEYS = [
   "hot-delayedProducts",
   "mostBid-delayedProducts",
 ];
+
+const isTargetQuery = (queryKey: readonly unknown[]) => {
+  return TARGET_KEYS.includes(queryKey[0] as string);
+};
 
 // 🔹 공통 updater
 const toggleWishUpdater = (id: number, type: "LIVE" | "DELAYED") => (old: unknown) => {
@@ -31,6 +44,7 @@ const toggleWishUpdater = (id: number, type: "LIVE" | "DELAYED") => (old: unknow
 
   if (old && typeof old === "object" && "items" in old) {
     const list = old as { items: ProductCard[] };
+
     return {
       ...list,
       items: list.items.map(item => (match(item) ? { ...item, isWish: !item.isWish } : item)),
@@ -39,6 +53,7 @@ const toggleWishUpdater = (id: number, type: "LIVE" | "DELAYED") => (old: unknow
 
   if (old && typeof old === "object" && "products" in old) {
     const res = old as { products: ProductCard[]; totalCount: number };
+
     return {
       ...res,
       products: res.products.map(item => (match(item) ? { ...item, isWish: !item.isWish } : item)),
@@ -51,26 +66,33 @@ const toggleWishUpdater = (id: number, type: "LIVE" | "DELAYED") => (old: unknow
 export const useWishToggle = () => {
   const qc = useQueryClient();
 
-  return useMutation<boolean, Error, { id: number; type: "LIVE" | "DELAYED" }>({
+  return useMutation<boolean, Error, WishToggleVariables, WishToggleContext>({
     mutationFn: ({ id, type }) =>
       type === "LIVE" ? liveWishToggle({ id }) : delayedWishToggle({ id }),
 
     onMutate: async ({ id, type }) => {
-      await qc.cancelQueries({
-        predicate: q => Array.isArray(q.queryKey) && TARGET_KEYS.includes(q.queryKey[0] as string),
-      });
+      const targetFilter = {
+        predicate: (query: { queryKey: readonly unknown[] }) => isTargetQuery(query.queryKey),
+      };
 
-      qc.setQueriesData(
-        {
-          predicate: q =>
-            Array.isArray(q.queryKey) && TARGET_KEYS.includes(q.queryKey[0] as string),
-        },
-        toggleWishUpdater(id, type)
-      );
+      await qc.cancelQueries(targetFilter);
+
+      const previousQueries = qc.getQueriesData(targetFilter);
+
+      qc.setQueriesData(targetFilter, toggleWishUpdater(id, type));
+
+      return {
+        previousQueries,
+      };
     },
 
-    onSuccess: () => {
-      // 찜 목록은 서버 기준으로만 동기화
+    onError: (_error, _variables, context) => {
+      context?.previousQueries.forEach(([queryKey, data]) => {
+        qc.setQueryData(queryKey, data);
+      });
+    },
+
+    onSettled: () => {
       qc.invalidateQueries({ queryKey: ["my-wish"] });
     },
   });
