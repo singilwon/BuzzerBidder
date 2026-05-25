@@ -4,6 +4,7 @@ import ProductsGrid from "@/components/common/ProductsGrid";
 import ProductCard from "@/components/common/ProductCard";
 import Title from "@/components/common/Title";
 import { useMyWish } from "@/features/mypage/hooks/useMyWish";
+import EmptyState from "@/components/common/EmptyState";
 
 export default function MyWish({ initialData }: { initialData?: ProductCardType[] }) {
   const { data: myWish } = useMyWish({ initialData });
@@ -17,14 +18,16 @@ export default function MyWish({ initialData }: { initialData?: ProductCardType[
         </Title>
         <ProductsGrid>
           {isEmpty ? (
-            <div className="border-border-sub col-span-full flex min-h-[220px] flex-col items-center justify-center rounded-md border-2 border-dashed bg-[#FDF6E9] text-center">
-              <p className="text-title-main text-lg font-bold">찜으로 등록된 상품이 없습니다</p>
-              <p className="mt-2 text-sm opacity-70">
-                아직 등록된 판매 상품이 없어요.
-                <br />
-                상품을 등록해보세요!
-              </p>
-            </div>
+            <EmptyState
+              title="찜으로 등록된 상품이 없습니다"
+              description={
+                <>
+                  관심 있는 상품을 찜해보세요.
+                  <br />
+                  찜한 상품은 이곳에서 확인할 수 있어요.
+                </>
+              }
+            />
           ) : (
             myWish?.map(product => (
               <ProductCard context="CARD" key={product.uid} product={product} />
