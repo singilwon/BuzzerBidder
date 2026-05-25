@@ -6,6 +6,7 @@ import ProductsGrid from "@/components/common/ProductsGrid";
 import Title from "@/components/common/Title";
 import { useMySell } from "@/features/mypage/hooks/useMySell";
 import { useExpandableProductList } from "@/features/mypage/hooks/useExpandableProductList";
+import EmptyState from "@/components/common/EmptyState";
 
 export default function SaleList({ initialData }: { initialData: ProductCardType[] | undefined }) {
   const { data: mySells } = useMySell({ initialData });
@@ -37,14 +38,16 @@ export default function SaleList({ initialData }: { initialData: ProductCardType
       <ContentContainer className="border-border-sub/50 shadow-flat-light w-full border px-3 py-4 md:w-full">
         <ProductsGrid>
           {isEmpty ? (
-            <div className="border-border-sub col-span-full flex min-h-[220px] flex-col items-center justify-center rounded-md border-2 border-dashed bg-[#FDF6E9] text-center">
-              <p className="text-title-main text-lg font-bold">판매중인 상품이 없습니다</p>
-              <p className="mt-2 text-sm opacity-70">
-                아직 등록된 판매 상품이 없어요.
-                <br />
-                상품을 등록해보세요!
-              </p>
-            </div>
+            <EmptyState
+              title="판매중인 상품이 없습니다"
+              description={
+                <>
+                  아직 등록된 판매 상품이 없어요.
+                  <br />
+                  상품을 등록해보세요!
+                </>
+              }
+            />
           ) : (
             shownProducts.map(product => (
               <ProductCard context="MY_SELLING" key={product.uid} product={product} />
