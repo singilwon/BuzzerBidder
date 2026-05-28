@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { delayedWishToggle, liveWishToggle } from "../api/wishToggle.api";
+import { mypageQueryKeys } from "@/features/mypage/constants/mypageQueryKeys";
 
 type WishableItem = {
   id: number;
@@ -20,18 +21,22 @@ type WishToggleContext = {
   previousQueries: [readonly unknown[], unknown][];
 };
 
-const TARGET_KEYS = [
-  "delayedProducts",
-  "liveProducts",
-  "my-sell",
-  "my-purchase",
-  "hot-liveProducts",
-  "hot-delayedProducts",
-  "mostBid-delayedProducts",
-];
+const TARGET_QUERY_KEYS = [
+  ["delayedProducts"],
+  ["liveProducts"],
+  mypageQueryKeys.sales(),
+  mypageQueryKeys.purchases(),
+  ["hot-liveProducts"],
+  ["hot-delayedProducts"],
+  ["mostBid-delayedProducts"],
+] as const;
+
+const isSameQueryKeyPrefix = (queryKey: readonly unknown[], targetKey: readonly unknown[]) => {
+  return targetKey.every((key, index) => queryKey[index] === key);
+};
 
 const isTargetQuery = (queryKey: readonly unknown[]) => {
-  return TARGET_KEYS.includes(queryKey[0] as string);
+  return TARGET_QUERY_KEYS.some(targetKey => isSameQueryKeyPrefix(queryKey, targetKey));
 };
 
 // 🔹 공통 updater
@@ -93,7 +98,7 @@ export const useWishToggle = () => {
     },
 
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["my-wish"] });
+      qc.invalidateQueries({ queryKey: mypageQueryKeys.wishes() });
     },
   });
 };
