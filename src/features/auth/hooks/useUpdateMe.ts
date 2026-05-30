@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updateMe } from "../api/updateMe.api";
 import Toast from "@/components/common/Toast";
+import { authQueryKeys } from "../constants/authQueryKeys";
 
 export const useUpdateMe = () => {
   const qc = useQueryClient();
@@ -9,7 +10,7 @@ export const useUpdateMe = () => {
     mutationFn: updateMe,
 
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["me"] });
+      qc.invalidateQueries({ queryKey: authQueryKeys.me() });
       Toast({ message: "회원정보가 수정되었습니다.", type: "SUCCESS" });
     },
     onError: error => {

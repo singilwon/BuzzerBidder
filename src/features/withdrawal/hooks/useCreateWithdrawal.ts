@@ -3,6 +3,7 @@ import { createWithdrawal } from "../api/withdrawal.api";
 import Toast from "@/components/common/Toast";
 import { withdrawalQueryKeys } from "../constants/withdrawalQueryKeys";
 import { paymentQueryKeys } from "@/features/payments/constants/paymentQueryKeys";
+import { authQueryKeys } from "@/features/auth/constants/authQueryKeys";
 
 type ErrorType = {
   msg: string;
@@ -17,7 +18,7 @@ export const useCreateWithdrawal = () => {
     mutationFn: createWithdrawal,
 
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["me"] });
+      qc.invalidateQueries({ queryKey: authQueryKeys.me() });
       qc.invalidateQueries({ queryKey: withdrawalQueryKeys.history() });
       qc.invalidateQueries({ queryKey: paymentQueryKeys.wallet() });
 
