@@ -1,5 +1,13 @@
 import ClientApi from "@/lib/clientApi";
 
+type HistoryPaymentsParams = {
+  startDate?: string;
+  endDate?: string;
+  paymentStatus?: string;
+  page?: number;
+  size?: number;
+};
+
 export const createPayments = async ({ amount }: { amount: number }) => {
   const res = await ClientApi<CreatePaymentsResponse>("/payments", {
     method: "POST",
@@ -27,15 +35,21 @@ export const approvePayments = async (
   return res.data;
 };
 
-export const historyPayments = async (): Promise<HistoryPaymentsResponse> => {
+export const historyPayments = async ({
+  startDate,
+  endDate,
+  paymentStatus,
+  page,
+  size,
+}: HistoryPaymentsParams): Promise<HistoryPaymentsResponse> => {
   const res = await ClientApi<HistoryPaymentsResponse>("/payments/history", {
     method: "GET",
     params: {
-      startDate: "2025-12-01",
-      endDate: "2026-01-15",
-      PaymentStatus: "SUCCESS",
-      page: 0,
-      size: 20,
+      startDate,
+      endDate,
+      PaymentStatus: paymentStatus,
+      page,
+      size,
     },
   });
 
