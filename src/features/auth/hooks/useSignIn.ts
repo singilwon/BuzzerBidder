@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { login } from "../api/login.api";
+import { authQueryKeys } from "../constants/authQueryKeys";
 
 export function useSignIn() {
   const qc = useQueryClient();
@@ -7,8 +8,8 @@ export function useSignIn() {
   return useMutation({
     mutationFn: login,
     onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ["me"] });
-      await qc.refetchQueries({ queryKey: ["me"] });
+      await qc.invalidateQueries({ queryKey: authQueryKeys.me() });
+      await qc.refetchQueries({ queryKey: authQueryKeys.me() });
     },
   });
 }

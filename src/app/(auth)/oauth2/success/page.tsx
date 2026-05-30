@@ -4,6 +4,7 @@ import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import { socialLogin } from "@/features/auth/api/socialLogin.api";
+import { authQueryKeys } from "@/features/auth/constants/authQueryKeys";
 
 export default function OAuth2SuccessPage() {
   return (
@@ -12,6 +13,7 @@ export default function OAuth2SuccessPage() {
     </Suspense>
   );
 }
+
 function OAuth2Success() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -23,10 +25,14 @@ function OAuth2Success() {
 
     (async () => {
       await socialLogin(tempToken);
-      await qc.invalidateQueries({ queryKey: ["me"] });
+
+      await qc.invalidateQueries({
+        queryKey: authQueryKeys.me(),
+      });
+
       router.replace("/?status=social_success");
     })();
-  }, [searchParams]);
+  }, [searchParams, qc, router]);
 
   return null;
 }
