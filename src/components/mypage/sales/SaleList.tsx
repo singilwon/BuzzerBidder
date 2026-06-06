@@ -7,18 +7,14 @@ import Title from "@/components/common/Title";
 import { useMySell } from "@/features/mypage/hooks/useMySell";
 import { useExpandableProductList } from "@/features/mypage/hooks/useExpandableProductList";
 import EmptyState from "@/components/common/EmptyState";
+import { isSellingProduct } from "@/features/mypage/utils/mypageProductFilters";
 
 export default function SaleList({ initialData }: { initialData: ProductCardType[] | undefined }) {
   const { data: mySells } = useMySell({ initialData });
 
   const sellItems = mySells ?? [];
 
-  const sellingItems = sellItems.filter(
-    product =>
-      product.status?.kind === "time" ||
-      (product.status?.kind === "status" &&
-        (product.status.status === "IN_PROGRESS" || product.status.status === "BEFORE_BIDDING"))
-  );
+  const sellingItems = sellItems.filter(isSellingProduct);
 
   const {
     expanded,
