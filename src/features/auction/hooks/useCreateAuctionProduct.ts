@@ -1,10 +1,13 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createDelayProduct, createLiveProduct } from "../api/auctionProduct.api";
+import { mypageQueryKeys } from "@/features/mypage/constants/mypageQueryKeys";
 
-export const useCreateAuctionProduct = () =>
-  useMutation<CreateLiveProductData | CreateDelayProductData, Error, CreateProductForm>({
+export const useCreateAuctionProduct = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<CreateLiveProductData | CreateDelayProductData, Error, CreateProductForm>({
     mutationFn: (form: CreateProductForm) => {
-      const { type, ...body } = form; // type은 넘겨줄 값에서 떼어버리기
+      const { type, ...body } = form;
 
       if (type === "LIVE") {
         return createLiveProduct(body as CreateLiveProductRequest);
@@ -12,4 +15,11 @@ export const useCreateAuctionProduct = () =>
 
       return createDelayProduct(body as CreateDelayProductRequest);
     },
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: mypageQueryKeys.sales(),
+      });
+    },
   });
+};
