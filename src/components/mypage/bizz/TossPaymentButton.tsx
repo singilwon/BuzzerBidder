@@ -4,11 +4,11 @@ import { useTossPayment } from "@/features/payments/hooks/useTossPayment";
 export default function TossPaymentButton({
   amount,
   user,
-  onClick,
+  onOpenWithdrawalModal,
 }: {
   amount: number;
   user: User | null | undefined;
-  onClick: () => void;
+  onOpenWithdrawalModal: () => void;
 }) {
   const { requestPayment, isPending } = useTossPayment({ amount, user });
 
@@ -23,7 +23,10 @@ export default function TossPaymentButton({
           충전
         </Button>
 
-        <Button className="bg-custom-red max-h-9 w-full text-white md:w-22" onClick={onClick}>
+        <Button
+          className="bg-custom-red max-h-9 w-full text-white md:w-22"
+          onClick={onOpenWithdrawalModal}
+        >
           출금
         </Button>
       </div>

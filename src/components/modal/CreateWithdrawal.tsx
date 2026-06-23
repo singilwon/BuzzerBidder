@@ -15,10 +15,16 @@ const STEP_INDEX: Record<Step, number> = {
   DONE: 2,
 };
 
-export default function CreateWithdrawalModal({ onClose }: { onClose: () => void }) {
+export default function CreateWithdrawalModal({
+  onClose,
+  initialAmount,
+}: {
+  onClose: () => void;
+  initialAmount: number;
+}) {
   const [step, setStep] = useState<Step>("INPUT");
   const [form, setForm] = useState({
-    amount: 0,
+    amount: initialAmount,
     bank: "",
     account: "",
     owner: "",
