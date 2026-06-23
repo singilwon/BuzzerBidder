@@ -10,11 +10,11 @@ import CreateWithdrawal from "@/components/modal/CreateWithdrawal";
 import { useMyWallet } from "@/features/payments/hooks/useMyWallet";
 
 export default function BizzBalance() {
-  const [open, setOpen] = useState(false);
+  const [isWithdrawalModalOpen, setIsWithdrawalModalOpen] = useState(false);
+  const [bizzAmount, setBizzAmount] = useState<number>(0);
+
   const { data: user } = useMe();
   const { data } = useMyWallet();
-
-  const [chargeBizz, setChargeBizz] = useState<number>(0);
 
   return (
     <ContentContainer
@@ -29,16 +29,26 @@ export default function BizzBalance() {
         </ContentContainer>
       </div>
 
-      {/* 버튼 영역 */}
       <div className="flex w-full max-w-[520px] flex-col justify-end gap-3 md:flex-row md:px-3">
         <PriceInput
           placeholder="충전 또는 출금할 금액 입력"
-          value={chargeBizz}
-          onChange={setChargeBizz}
+          value={bizzAmount}
+          onChange={setBizzAmount}
           className="h-9 md:w-[290px]"
-        ></PriceInput>
-        <TossPaymentButton amount={chargeBizz} user={user} onClick={() => setOpen(true)} />
-        {open && <CreateWithdrawal onClose={() => setOpen(false)} />}
+        />
+
+        <TossPaymentButton
+          amount={bizzAmount}
+          user={user}
+          onOpenWithdrawalModal={() => setIsWithdrawalModalOpen(true)}
+        />
+
+        {isWithdrawalModalOpen && (
+          <CreateWithdrawal
+            initialAmount={bizzAmount}
+            onClose={() => setIsWithdrawalModalOpen(false)}
+          />
+        )}
       </div>
     </ContentContainer>
   );
